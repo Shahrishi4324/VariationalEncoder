@@ -77,10 +77,30 @@ for epoch in range(epochs):
         loss = loss_function(recon_batch, data, mu, logvar)
         loss.backward()
         train_loss += loss.item()
-        optimizer.step()
+        optimizer.step()    
     
     print(f'Epoch {epoch + 1}, Loss: {train_loss / len(train_loader.dataset):.4f}')
 
 # Save the trained model
 torch.save(model.state_dict(), "vae_mnist.pth")
 print("Model saved!")
+
+import matplotlib.pyplot as plt
+
+# Load the trained model
+model.load_state_dict(torch.load("vae_mnist.pth"))
+model.eval()
+
+# Generate images by sampling from the latent space
+with torch.no_grad():
+    z = torch.randn(64, 20).to(device)
+    sample = model.decode(z).cpu()
+    sample = sample.view(64, 1, 28, 28)
+
+    # Plot the generated images
+    plt.figure(figsize=(8, 8))
+    for i in range(64):
+        plt.subplot(8, 8, i + 1)
+        plt.imshow(sample[i][0], cmap='gray')
+        plt.axis('off')
+    plt.show()
