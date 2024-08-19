@@ -63,3 +63,24 @@ def loss_function(recon_x, x, mu, logvar):
     return BCE + KLD
 
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
+# Training the VAE
+epochs = 10
+model.train()
+
+for epoch in range(epochs):
+    train_loss = 0
+    for batch_idx, (data, _) in enumerate(train_loader):
+        data = data.to(device)
+        optimizer.zero_grad()
+        recon_batch, mu, logvar = model(data)
+        loss = loss_function(recon_batch, data, mu, logvar)
+        loss.backward()
+        train_loss += loss.item()
+        optimizer.step()
+    
+    print(f'Epoch {epoch + 1}, Loss: {train_loss / len(train_loader.dataset):.4f}')
+
+# Save the trained model
+torch.save(model.state_dict(), "vae_mnist.pth")
+print("Model saved!")
