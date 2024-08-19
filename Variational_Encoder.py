@@ -55,3 +55,11 @@ class VAE(nn.Module):
 
 # Instantiate the model and move it to the device
 model = VAE().to(device)
+
+# Reconstruction + KL divergence losses summed over all elements and batch
+def loss_function(recon_x, x, mu, logvar):
+    BCE = nn.functional.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum')
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    return BCE + KLD
+
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
